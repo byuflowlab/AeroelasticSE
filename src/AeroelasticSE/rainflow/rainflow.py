@@ -28,6 +28,8 @@ def ReadFASTbinary(FileName):
     LenUnit = 10 # number of characters per unit name
 
     if (os.path.isfile(FileName)):
+
+
         fid  = file( FileName, "rb" )
         #----------------------------        
         # get the header information
@@ -37,6 +39,7 @@ def ReadFASTbinary(FileName):
     
         NumOutChans  = np.fromfile (fid, count=1, dtype='int32')[0]             # The number of output channels, INT(4)
         NT           = np.fromfile( fid, count=1, dtype='int32')[0]             # The number of time steps, INT(4)
+
 
         if FileID == 1:
             TimeScl  = np.fromfile( fid, count=1, dtype='float64')           # The time slopes for scaling, REAL(8)
@@ -49,13 +52,19 @@ def ReadFASTbinary(FileName):
         ColOff       = np.fromfile( fid, count=NumOutChans, dtype='float32') # The channel offsets for scaling, REAL(4)
 
         LenDesc      = np.fromfile( fid, count=1,           dtype='int32' )  # The number of characters in the description string, INT(4)
-        DescStrASCII = np.fromfile( fid, count=LenDesc,     dtype='uint8' )  # DescStr converted to ASCII
-        DescStr      = mytostr(DescStrASCII )                     
-    
+        #DescStrASCII = np.fromfile( fid, count=LenDesc,     dtype='uint8' )  # DescStr converted to ASCII
+        #DescStr      = mytostr(DescStrASCII )
+
+        # print(NumOutChans)
+        # quit()
+
         ChanName = []                   # initialize the ChanName cell array
-        for iChan in range( 0,NumOutChans+1): 
+        for iChan in range( 0,NumOutChans+1):
+
+
             ChanNameASCII = np.fromfile( fid, count=LenName, dtype='uint8' ) # ChanName converted to numeric ASCII
             ChanName.append( mytostr(ChanNameASCII))
+
 
         ChanUnit = []                   # initialize the ChanUnit cell array
         for iChan in range(0,NumOutChans+1):
@@ -92,8 +101,8 @@ def ReadFASTbinary(FileName):
     #             ip = ip + 1
     #         end # ic       
     #     end %it
-    #     
-        
+    #
+
         dat = np.reshape(PackedData,(NumOutChans,NT), order='F')
         dat = np.transpose(dat)
         for ic in range(0,NumOutChans):
@@ -105,7 +114,7 @@ def ReadFASTbinary(FileName):
             Channels[:,0] = TimeOut1 + TimeIncr * np.array(range(0,NT))[:]
             
     else:
-        error('Could not open the FAST binary file: ' + FileName) 
+        error('Could not open the FAST binary file: ' + FileName)
 
     return Channels, ChanName
 
@@ -201,9 +210,11 @@ def do_rainflow(files, output_array, SNslope):
     write_txt_output = False
     allres = []
     nslopes = SNslope.shape[0]
+
     for f in files:    
         # read the output
-        chan, name = ReadFASTbinary(f)    
+        chan, name = ReadFASTbinary(f)
+
         if (write_txt_output):
             write_txt("test.out", name, chan)
 
@@ -214,6 +225,7 @@ def do_rainflow(files, output_array, SNslope):
         equivFreq = 1.0
         PSF = 1.1
         nEquivalantCounts = 600/equivFreq
+        #nEquivalantCounts = 1/equivFreq
 
         res = np.zeros((len(output_array),nslopes)) 
         for i in range(len(output_array)):
@@ -225,7 +237,7 @@ def do_rainflow(files, output_array, SNslope):
             cycles = np.reshape(output, (nPeaks,5))        
             cycleRanges = cycles[:,0]
             cycleCounts = cycles[:,3]       
-    #the "m" value corresponds to different Wholer exponents... "I" (Gordie) oiginally used 3 different exponents, but we can just use 4 for the steel components (tower and mooring lines) and 10 for the fiberglass components (blades)
+    #``the "m" value corresponds to different Wholer exponents... "I" (Gordie) oiginally used 3 different exponents, but we can just use 4 for the steel components (tower and mooring lines) and 10 for the fiberglass components (blades)
             for m in range(nslopes): 
                 #here is the equation to calculate the damage equivalent load using the output of the rainflow function
                 val = ( sum( cycleCounts *( cycleRanges **SNslope[m,i] ) )/nEquivalantCounts )**( 1.0/SNslope[m,i] )*PSF
@@ -238,19 +250,22 @@ def do_rainflow(files, output_array, SNslope):
 
 
 if __name__=="__main__":
+
+    files = ["/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST/AeroelasticSE/src/AeroelasticSE/FAST_mdao/wrapper_examples/NRELOffshrBsline5MW_Onshore_v7_RotorSE/DLC2.outb"]
+
 #    files = ["Sims/DLCud_3601_Sea_24.0V0_04.5Hs_09.5Tp_00.0Wd_S001.outb"]
 
-    files = ['DLCud_3601_Sea_24.0V0_04.5Hs_09.5Tp_00.0Wd_S001.outb',
-             'DLCud_3241_Sea_22.0V0_04.0Hs_09.0Tp_00.0Wd_S001.outb',
-             'DLCud_2881_Sea_20.0V0_03.6Hs_08.5Tp_00.0Wd_S001.outb',
-             'DLCud_2521_Sea_18.0V0_03.1Hs_08.0Tp_00.0Wd_S001.outb',
-             'DLCud_2161_Sea_16.0V0_02.6Hs_07.6Tp_00.0Wd_S001.outb',
-             'DLCud_1801_Sea_14.0V0_02.2Hs_07.5Tp_00.0Wd_S001.outb',
-             'DLCud_1441_Sea_12.0V0_01.8Hs_07.4Tp_00.0Wd_S001.outb',
-             'DLCud_1081_Sea_10.0V0_01.5Hs_07.7Tp_00.0Wd_S001.outb',
-             'DLCud_0721_Sea_08.0V0_01.3Hs_08.0Tp_00.0Wd_S001.outb',
-             'DLCud_0361_Sea_06.0V0_01.2Hs_08.3Tp_00.0Wd_S001.outb',
-             'DLCud_0001_Sea_04.0V0_01.1Hs_08.5Tp_00.0Wd_S001.outb']
+    # files = ['DLCud_3601_Sea_24.0V0_04.5Hs_09.5Tp_00.0Wd_S001.outb',
+    #          'DLCud_3241_Sea_22.0V0_04.0Hs_09.0Tp_00.0Wd_S001.outb',
+    #          'DLCud_2881_Sea_20.0V0_03.6Hs_08.5Tp_00.0Wd_S001.outb',
+    #          'DLCud_2521_Sea_18.0V0_03.1Hs_08.0Tp_00.0Wd_S001.outb',
+    #          'DLCud_2161_Sea_16.0V0_02.6Hs_07.6Tp_00.0Wd_S001.outb',
+    #          'DLCud_1801_Sea_14.0V0_02.2Hs_07.5Tp_00.0Wd_S001.outb',
+    #          'DLCud_1441_Sea_12.0V0_01.8Hs_07.4Tp_00.0Wd_S001.outb',
+    #          'DLCud_1081_Sea_10.0V0_01.5Hs_07.7Tp_00.0Wd_S001.outb',
+    #          'DLCud_0721_Sea_08.0V0_01.3Hs_08.0Tp_00.0Wd_S001.outb',
+    #          'DLCud_0361_Sea_06.0V0_01.2Hs_08.3Tp_00.0Wd_S001.outb',
+    #          'DLCud_0001_Sea_04.0V0_01.1Hs_08.5Tp_00.0Wd_S001.outb']
     
     files = [os.path.join("Sims", f) for f in files]
 
@@ -259,14 +274,16 @@ if __name__=="__main__":
     ##output files
     ## these are literally the indices in the FAST output table of the fields of interest
     ## (in python they are 0-based)
-    output_array = [52, 53, 91, 92, 99]
+    output_array = [3, 4, 5, 6, 7]
     ## these are the powers that the cycles are raised to in order to get the final fatigue.
     ## they are properties of the materials of the corresponding fields (so they are tied
     ## to the indices in "output_array"
     SNslope = np.array([[1,1,1,1,1],[ 8,  8, 3, 3, 3],
                         [10, 10, 4, 4, 4],
                         [12, 12, 5, 5, 5]], dtype="double")
-    
+
+    #SNslope = np.array([[1], [8], [10], [12]], dtype="double")
+
     allres = do_rainflow(files, output_array, SNslope)
     for i in range(len(files)):
         print f

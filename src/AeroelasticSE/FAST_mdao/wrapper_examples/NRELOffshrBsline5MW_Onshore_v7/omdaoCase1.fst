@@ -1,0 +1,194 @@
+---
+---
+NREL 5.0 MW Baseline Wind Turbine for Use in Offshore Analysis.
+---
+---
+False
+  3
+  1
+  3
+100.00000
+0.01250
+---
+  0
+9999.90000
+  1
+0.00000
+  2
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+  2
+True
+True
+9999.90000
+0.00000
+9999.90000
+  1
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+0.00000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+0.00000
+0.00000
+0.00000
+0.00000
+0.00000
+0.00000
+---
+9.80665
+---
+True
+True
+True
+False
+True
+True
+True
+True
+True
+True
+True
+True
+False
+---
+0.00000
+0.00000
+0.00000
+0.00000
+12.10000
+0.00000
+0.00000
+0.00000
+---
+63.00000
+1.50000
+  1
+0.00000
+0.00000
+-5.01910
+1.90000
+0.00000
+1.75000
+87.60000
+1.96256
+0.00000
+-5.00000
+0.00000
+-2.50000
+-2.50000
+-2.50000
+0.00000
+---
+0.00000
+240000.00000
+56780.00000
+0.00000
+0.00000
+0.00000
+2607890.00000
+534.11600
+115926.00000
+---
+100.00000
+94.40000
+97.00000
+False
+28116.20000
+0.60000
+"Dummy"
+867637000.00000
+6215000.00000
+---
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+---
+9999.90000
+ 9998
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+9999.90000
+---
+  0
+"Dummy"
+---
+ 20
+"NRELOffshrBsline5MW_Tower_Onshore.dat"
+---
+9028320000.00000
+19160000.00000
+0.00000
+---
+False
+"Dummy"
+---
+0
+0.00000
+0.00000
+0.00000
+0.00000
+0.00000
+0.00000
+0.00000
+---
+0.00000
+0.00000
+0.00000
+---
+"NRELOffshrBsline5MW_Blade.dat"
+"NRELOffshrBsline5MW_Blade.dat"
+"NRELOffshrBsline5MW_Blade.dat"
+---
+"NRELOffshrBsline5MW_AeroDyn.ipt"
+---
+"Dummy"
+---
+"NRELOffshrBsline5MW_ADAMSSpecific.dat"
+---
+"NRELOffshrBsline5MW_Linear.dat"
+---
+True
+1
+True
+"ES10.3E2"
+0.00000
+  1
+1.00000
+-3.09528
+0.00000
+2.23336
+1.91200
+  0
+    
+  3
+ 5 , 9  , 13 
+Outlist
+"WindVzi, WindVyi, WindVxi, "
+"TwstDefl1, IPDefl1, TwstDefl2, OoPDefl3, OoPDefl1, OoPDefl2, IPDefl3, IPDefl2, TwstDefl3, "
+"Azimuth, GenSpeed, RotSpeed, BldPitch1, "
+"TTDspTwst, TTDspFA, TTDspSS, "
+""
+"RootFzc1, RootFxc1, RootMxb1, RootMyb1, Spn1MLxb1, RootMzc1, RootMyc1, RootMzb1, Spn2MLxb1, RootFyc1, Spn1MLyb1, Spn2MLyb1, RootMxc1, "
+"GenPwr, RotTorq, GenTq, LSSGagMza, LSSGagMya, "
+"YawBrFyp, YawBrMzp, YawBrFzp, YawBrMxp, TwrBsMxt, YawBrFxp, TwrBsMyt, TwrBsFyt, TwrBsMzt, TwrBsFxt, YawBrMyp, TwrBsFzt, "
+""
+END

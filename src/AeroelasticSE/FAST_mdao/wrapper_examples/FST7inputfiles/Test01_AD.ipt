@@ -1,0 +1,45 @@
+Aerodyn input file for FAST
+SI
+BEDDOES
+NO_CM
+EQUIL
+WAKE
+0.005
+PRANDtl
+PRANDtl
+"test.wnd"
+90.0
+0.0
+9999.9
+9999.9
+1.225
+0.000014792
+0.02479
+ 8
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/Cylinder1.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/Cylinder2.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/DU40_A17.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/DU35_A17.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/DU30_A17.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/DU25_A17.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/DU21_A17.dat"
+"/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST_coupling/RotorSE/src/rotorse/5MW_AFFiles_FAST/NACA64_A17.dat"
+17
+Nodal properties
+2.86670	13.308	2.7333	3.542	    1	NOPRINT
+5.60000	13.308	2.7333	3.854	    1	NOPRINT
+8.33330	13.308	2.7333	4.167	    2	NOPRINT
+11.75000	13.308	4.1000	4.557	    3	NOPRINT
+15.85000	11.480	4.1000	4.652	    4	NOPRINT
+19.95000	10.162	4.1000	4.458	    4	NOPRINT
+24.05000	9.011	4.1000	4.249	    5	NOPRINT
+28.15000	7.795	4.1000	4.007	    6	NOPRINT
+32.25000	6.544	4.1000	3.748	    6	NOPRINT
+36.35000	5.361	4.1000	3.502	    7	NOPRINT
+40.45000	4.188	4.1000	3.256	    7	NOPRINT
+44.55000	3.125	4.1000	3.010	    8	NOPRINT
+48.65000	2.319	4.1000	2.764	    8	NOPRINT
+52.75000	1.526	4.1000	2.518	    8	NOPRINT
+56.16670	0.863	2.7333	2.313	    8	NOPRINT
+58.90000	0.370	2.7333	2.086	    8	NOPRINT
+61.63330	0.106	2.7333	1.419	    8	NOPRINT
