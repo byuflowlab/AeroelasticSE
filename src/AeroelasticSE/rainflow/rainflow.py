@@ -1,6 +1,7 @@
 #function [Channels, ChanName, ChanUnit, FileID] = ReadFASTbinary(FileName)
 
 import sys, os, numpy as np
+import re
 
 def mytostr(ascii_str):
     s = ''.join(chr(i) for i in ascii_str )                     
@@ -9,6 +10,29 @@ def mytostr(ascii_str):
 def error(s):
     raise ValueError, s
 
+def ReadFASToutput(nb_FAST_output_file):
+
+    file_rainflow = open(nb_FAST_output_file)
+    line_rainflow = file_rainflow.readlines()
+
+    # extract names fron non-binary FAST output file
+    name_line = 6
+    str_val = re.findall("\w+",line_rainflow[name_line])
+
+    # extract data from non-binary FAST output file
+    head_len = 8
+
+    FAST_output_array = np.zeros([len(line_rainflow), len(str_val)])
+
+    for k in range(head_len, len(line_rainflow)):
+        int_val = re.findall("[-+]?\d+[\.]?\d*[eE]?[-+]?\d*", line_rainflow[k])
+        for j in range(0, len(str_val)):
+            FAST_output_array[k][j] = float(int_val[j])
+
+    # return chan, name
+    return FAST_output_array, str_val
+
+# TODO: determine error in ReadFASTbinary function
 def ReadFASTbinary(FileName):
 
     # Channels, ChannelNames = ReadFASTbinary(FileName)
@@ -190,70 +214,123 @@ def rain_one(col, slope):
     cycles = np.reshape(output, (nPeaks,5))        
     cycleRanges = cycles[:,0]
     cycleCounts = cycles[:,3]       
-    #the "m" value corresponds to different Wholer exponents... "I" (Gordie) oiginally used 3 different exponents, but we can just use 4 for the steel components (tower and mooring lines) and 10 for the fiberglass components (blades)
+    #the "m" value corresponds to different Wholer exponents... "I" (Gordie) oiginally used 3 different exponents,
+    # but we can just use 4 for the steel components (tower and mooring lines) and 10 for the fiberglass components (blades)
                     #here is the equation to calculate the damage equivalent load using the output of the rainflow function
     val = ( sum( cycleCounts *( cycleRanges **slope ) )/nEquivalantCounts )**( 1.0/slope )*PSF
 
     return val
     
-def do_rainflow(files, output_array, SNslope):
+def do_rainflow(files, output_array, SNslope, Tmax=600, dT = 0.0125, rm_time=0.0, check_rm_time='false'):
     ## orchestrates whole series of steps to read FAST output, then do rainflow counting to get loads
 
     # import the swig-ized rainflow.c code
     import _rainflow_swig as rf
     ## [prototype builds on Pgraf's mac with: 
     #swig -python rainflow_swig.i
-    #gcc -c rainflow_swig.c rainflow_swig_wrap.c  -I/opt/local/Library/Frameworks/Python.framework/Versions/2.7/include/python2.7/ -I/opt/local//Library/Frameworks/Python.framework/Versions/2.7/lib/python2.7/site-packages/numpy/core/include/
-    #gcc -shared rainflow_swig.o rainflow_swig_wrap.o -o _rainflow_swig.so /opt/local/Library/Frameworks/Python.framework/Versions/2.7/lib/libpython2.7.dylib ]
+    #gcc -c rainflow_swig.c rainflow_swig_wrap.c  -I/opt/local/Library/Frameworks/Python.framework/
+    # Versions/2.7/include/python2.7/ -I/opt/local//Library/Frameworks/Python.framework/
+    # Versions/2.7/lib/python2.7/site-packages/numpy/core/include/
+    #gcc -shared rainflow_swig.o rainflow_swig_wrap.o -o _rainflow_swig.so /opt/local/Library/Frameworks/Python.framework/
+    # Versions/2.7/lib/libpython2.7.dylib ]
     ##
-    
-    write_txt_output = False
     allres = []
     nslopes = SNslope.shape[0]
 
-    for f in files:    
-        # read the output
-        chan, name = ReadFASTbinary(f)
+    for f in files:
 
-        if (write_txt_output):
-            write_txt("test.out", name, chan)
+        # === read output file === #
+
+        # if last char in string is 'b', use ReadFASTbinary
+        if f[-1] == 'b':
+            chan, name = ReadFASTbinary(f)
+        # if last char in string is 't', use ReadFASToutput
+        elif f[-1] == 't':
+            chan, name = ReadFASToutput(f)
+        # else, throw error
+        else:
+            raise Exception('Unable to read FAST output file; check string name.')
+
+        # === remove artificially noisy data === #
+        orig_chan = chan
+        temp_chan = chan[int(rm_time/dT):-1]
+
+        # plot removed output data
+        if check_rm_time == 'true':
+            time_chan = np.linspace(0,Tmax,len(chan[:,0]))
+            time_temp_chan = np.linspace(Tmax-rm_time,Tmax,len(temp_chan[:,0]))
+            import matplotlib.pyplot as plt
+            plt.figure()
+            plt.plot(time_chan,chan[:,5],label='original output')
+            plt.plot(time_temp_chan, temp_chan[:,5],label='noise removed')
+            plt.title('RootMxb1')
+            plt.legend()
+            plt.savefig('/Users/bingersoll/Desktop/noise_removed.eps')
+            plt.show()
+
+            quit()
+
+        chan = temp_chan
 
         # constants
         UCMult = 0.5
         LUlt = 0
         LMF = 0
-        equivFreq = 1.0
-        PSF = 1.1
-        nEquivalantCounts = 600/equivFreq
-        #nEquivalantCounts = 1/equivFreq
+        equivFreq = 6.0
+        PSF = 1.0
+        #nEquivalantCounts = 600/equivFreq
+        # nEquivalantCounts = Tmax/equivFreq
+        nEquivalantCounts = (Tmax-rm_time)/equivFreq
+
+        # peaks array
+        peaks_list = []
 
         res = np.zeros((len(output_array),nslopes)) 
         for i in range(len(output_array)):
+
             p = output_array[i]
+
             peaks, nPeaks = determine_peaks(chan[:,p])
             output = np.zeros(5*nPeaks,dtype="double")
+
+            peaks_list.append(peaks)
+
             rf.rainflow(output, peaks, LMF, LUlt, UCMult)
+
             # output contains a 5 * nPeaks array of data:
             cycles = np.reshape(output, (nPeaks,5))        
             cycleRanges = cycles[:,0]
-            cycleCounts = cycles[:,3]       
-    #``the "m" value corresponds to different Wholer exponents... "I" (Gordie) oiginally used 3 different exponents, but we can just use 4 for the steel components (tower and mooring lines) and 10 for the fiberglass components (blades)
+            cycleCounts = cycles[:,3]
+
+            check_peaks = 'false'
+            if check_peaks == 'true':
+                if p == 5: # RootMxb1
+                    print(peaks)
+                    print(nPeaks)
+
+                    print(cycleRanges)
+                    print(cycleCounts)
+
+                    print(nEquivalantCounts)
+
+                    quit()
+
+    #``the "m" value corresponds to different Wholer exponents... "I" (Gordie) oiginally used 3 different exponents,
+
+            # but we can just use 4 for the steel components (tower and mooring lines) and 10 for the fiberglass components (blades)
             for m in range(nslopes): 
                 #here is the equation to calculate the damage equivalent load using the output of the rainflow function
                 val = ( sum( cycleCounts *( cycleRanges **SNslope[m,i] ) )/nEquivalantCounts )**( 1.0/SNslope[m,i] )*PSF
                 res[i,m] = val
 
-#        print "final answer:"
-#        print res
         allres.append(res)
-    return allres
+
+    return allres, peaks_list, orig_chan, chan, name
 
 
 if __name__=="__main__":
 
-    files = ["/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST/AeroelasticSE/src/AeroelasticSE/FAST_mdao/wrapper_examples/NRELOffshrBsline5MW_Onshore_v7_RotorSE/DLC2.outb"]
-
-#    files = ["Sims/DLCud_3601_Sea_24.0V0_04.5Hs_09.5Tp_00.0Wd_S001.outb"]
+    files = ["Sims/DLCud_3601_Sea_24.0V0_04.5Hs_09.5Tp_00.0Wd_S001.outb"]
 
     # files = ['DLCud_3601_Sea_24.0V0_04.5Hs_09.5Tp_00.0Wd_S001.outb',
     #          'DLCud_3241_Sea_22.0V0_04.0Hs_09.0Tp_00.0Wd_S001.outb',
@@ -266,14 +343,16 @@ if __name__=="__main__":
     #          'DLCud_0721_Sea_08.0V0_01.3Hs_08.0Tp_00.0Wd_S001.outb',
     #          'DLCud_0361_Sea_06.0V0_01.2Hs_08.3Tp_00.0Wd_S001.outb',
     #          'DLCud_0001_Sea_04.0V0_01.1Hs_08.5Tp_00.0Wd_S001.outb']
-    
-    files = [os.path.join("Sims", f) for f in files]
+    #
+    # files = [os.path.join("Sims", f) for f in files]
 
     ##get DELs for Blade edge:53 and flap:54 bending moment, tower SS:92 and FA:93, and
     ##anchor tension:100. Note: these might be different for different FAST
+
     ##output files
     ## these are literally the indices in the FAST output table of the fields of interest
     ## (in python they are 0-based)
+
     output_array = [3, 4, 5, 6, 7]
     ## these are the powers that the cycles are raised to in order to get the final fatigue.
     ## they are properties of the materials of the corresponding fields (so they are tied
@@ -286,5 +365,6 @@ if __name__=="__main__":
 
     allres = do_rainflow(files, output_array, SNslope)
     for i in range(len(files)):
-        print f
+
+        print(i)
         print allres[i]

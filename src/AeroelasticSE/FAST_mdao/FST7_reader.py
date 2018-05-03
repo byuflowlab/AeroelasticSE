@@ -895,7 +895,11 @@ class Fst7InputReader(Fst7InputBase):
 
     def WndWindReader(self):
 
+        # TODO: Document this
         wind_file = os.path.join(self.fst_directory, self.fst_vt.aerodyn.WindFile)
+        # wind_file = self.fst_vt.aerodyn.WindFile
+        # wind_file = wind_file.replace('"', '')
+
         # print( self.fst_vt.aerodyn.WindFile)
         # quit()
         f = open(wind_file)

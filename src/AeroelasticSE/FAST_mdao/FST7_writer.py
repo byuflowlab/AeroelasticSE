@@ -722,9 +722,9 @@ class Fst7InputWriter(Fst7InputBase):
 		ofh.write('{:.1f}\n'.format(self.fst_vt.aerodyn.TwrShad))  
 		ofh.write('{:.1f}\n'.format(self.fst_vt.aerodyn.ShadHWid))  
 		ofh.write('{:.1f}\n'.format(self.fst_vt.aerodyn.T_Shad_Refpt))  
-		ofh.write('{:.3f}\n'.format(self.fst_vt.aerodyn.AirDens))  
-		ofh.write('{:.9f}\n'.format(self.fst_vt.aerodyn.KinVisc))  
-		ofh.write('{:2}\n'.format(self.fst_vt.aerodyn.DTAero))        
+		ofh.write('{:.3f}\n'.format(self.fst_vt.aerodyn.AirDens))
+		ofh.write('{:.9f}\n'.format(self.fst_vt.aerodyn.KinVisc))
+		ofh.write('{:2}\n'.format(self.fst_vt.aerodyn.DTAero))
 
 		ofh.write('{:2}\n'.format(self.fst_vt.blade_aero.NumFoil))
 		for i in range (self.fst_vt.blade_aero.NumFoil):
@@ -844,7 +844,10 @@ class Fst7InputWriter(Fst7InputBase):
 
 		if self.fst_vt.aerodyn.wind_file_type == 'wnd':
 
+			# TODO: Document this:
 			wind_file = os.path.join(self.fst_directory, self.fst_vt.aerodyn.WindFile)
+			# wind_file = self.fst_vt.aerodyn.WindFile
+			# wind_file = wind_file.replace('"', '')
 			ofh = open(wind_file,'w')
 		
 			for i in range(self.fst_vt.wnd_wind.TimeSteps):

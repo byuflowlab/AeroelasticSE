@@ -5,6 +5,7 @@ from FST7_wrapper import Fst7Wrapper
 import math
 import os
 import numpy as np
+import sys
 
 # ===================== Miscellaneous Functions =====================
 
@@ -67,7 +68,7 @@ class FST7Workflow (Component):
 	this class to enable OpenMDAO-style connectivity to FAST variables of interest."""
 
 	#def __init__(self, config, case):
-	def __init__(self, caseids):
+	def __init__(self, caseids, Tmax, dT, outputlist):
 		""" A FAST component that executes the workflow. Takes a single dictionary, config, as well as a case
 		name as the input. Executes FAST workflow in the associated case running directory.
 		"""
@@ -81,47 +82,25 @@ class FST7Workflow (Component):
 		self.add_param('cfg_master', val=dict(),pass_by_obj=False)
 
 		self.caseids = caseids
-		# need to fix, but general idea is
-		#config = config[numDLC]
 
-		# add outputs
+		# need to add Tmax, DT
+		self.Tmax = Tmax
+		self.Dt = dT
 
-		OutputList = open("/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST/RotorSE/src/rotorse/FASTOutputList.txt", 'r')
+		numval = (self.Tmax/self.Dt)+1
 
-		lines = OutputList.read().split('\n')
-		# print lines
-		# print(len(lines))
-		# quit()
-		for i in range(0,len(lines)):# in OutputList:
-			# test = line
-			# print test
-			self.add_output(lines[i], shape=401)
-			#
-			# print()
+		for i in range(0,len(outputlist)):
 
-		# quit()
-		# print(OutputList.readlines())
-		# quit()
-        #
-		self.add_output('Time', shape=[401])  # add Time variable (included by default)
-		# self.add_output('WindVzi', shape=[401])
-		# self.add_output('WindVyi', shape=[401])
-		# self.add_output('WindVxi', shape=[401])
+			self.add_output(outputlist[i], shape=numval)
+
+		self.add_output('Time', shape=[numval])  # add Time variable (included by default)
 
 		# create other set of outputs
 		self.add_output(caseids, dict())
 
 	def solve_nonlinear(self, params, unknowns, resids):
 
-		self.caseids
-
-		#print(params['cfg_master'])
-		#quit()
-
 		config = params['cfg_master'][self.caseids]
-
-		#print config[self.caseids]
-		#quit()
 
 		# If present, extract file and directory names/locations from config file, assign to instance
 		for key in config:
@@ -193,6 +172,7 @@ class FST7Workflow (Component):
 		# ===== Assign Outputs =====
 		# Build output file name
 		casename = self.wrapper.FSTInputFile.rsplit('.', 1)[0]
+
 		fname = "{0}.out".format(casename)
 
 		# Parse output file
@@ -209,9 +189,6 @@ class FST7Workflow (Component):
 		# print(unknowns[self.caseids])
 		# quit()
 
-
-
-
 class FST7AeroElasticSolver(Group):
 	"""
 	OpenMDAO group to execute FAST components in parallel.
@@ -222,7 +199,7 @@ class FST7AeroElasticSolver(Group):
 	"""
 
 	#def __init__(self, configs, caseids):
-	def __init__(self, caseids):
+	def __init__(self, caseids, Tmax_turb, Tmax_nonturb, wndtypelist, dT, outputlist):
 		super(FST7AeroElasticSolver, self).__init__()
 
 		#self._check_config(configs, caseids) #could write function to check setup
@@ -231,9 +208,15 @@ class FST7AeroElasticSolver(Group):
 
 		#Loop over cases, add them to the parallel group
 		case_num = len(caseids)
+
 		for i in range(case_num):
-			#pg.add(caseids[i], FST7Workflow(configs[caseids[i]], caseids[i]))
-			pg.add(caseids[i], FST7Workflow(caseids[i]),promotes=['cfg_master',caseids[i]])
+
+			if wndtypelist[i] == 'turb':
+				Tmax = Tmax_turb
+			else:
+				Tmax = Tmax_nonturb
+
+			pg.add(caseids[i], FST7Workflow(caseids[i],Tmax,dT, outputlist),promotes=['cfg_master',caseids[i]])
 
 
 
