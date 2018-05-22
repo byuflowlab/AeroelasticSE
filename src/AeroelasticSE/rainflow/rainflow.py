@@ -221,7 +221,7 @@ def rain_one(col, slope):
 
     return val
     
-def do_rainflow(files, output_array, SNslope, Tmax=600, dT = 0.0125, rm_time=0.0, check_rm_time='false'):
+def do_rainflow(files, output_array, SNslope, dir_saved_plots, Tmax=600, dT = 0.0125, rm_time=0.0, check_rm_time=False):
     ## orchestrates whole series of steps to read FAST output, then do rainflow counting to get loads
 
     # import the swig-ized rainflow.c code
@@ -256,7 +256,7 @@ def do_rainflow(files, output_array, SNslope, Tmax=600, dT = 0.0125, rm_time=0.0
         temp_chan = chan[int(rm_time/dT):-1]
 
         # plot removed output data
-        if check_rm_time == 'true':
+        if check_rm_time:
             time_chan = np.linspace(0,Tmax,len(chan[:,0]))
             time_temp_chan = np.linspace(Tmax-rm_time,Tmax,len(temp_chan[:,0]))
             import matplotlib.pyplot as plt
@@ -265,7 +265,7 @@ def do_rainflow(files, output_array, SNslope, Tmax=600, dT = 0.0125, rm_time=0.0
             plt.plot(time_temp_chan, temp_chan[:,5],label='noise removed')
             plt.title('RootMxb1')
             plt.legend()
-            plt.savefig('/Users/bingersoll/Desktop/noise_removed.eps')
+            plt.savefig(dir_saved_plots + '/noise_removed.eps')
             plt.show()
 
             quit()
@@ -302,8 +302,8 @@ def do_rainflow(files, output_array, SNslope, Tmax=600, dT = 0.0125, rm_time=0.0
             cycleRanges = cycles[:,0]
             cycleCounts = cycles[:,3]
 
-            check_peaks = 'false'
-            if check_peaks == 'true':
+            check_peaks = False
+            if check_peaks:
                 if p == 5: # RootMxb1
                     print(peaks)
                     print(nPeaks)
