@@ -47,7 +47,7 @@ def parseFASTout(fname, directory = None):
 	fin.close
 
 	# let numpy do the rest
-	warmup = 0  ## also skip this many outputs, so np.loadtxt doesn't complain about "*****" entries in Fortran output 
+	warmup = 0  ## also skip this many outputs, so np.loadtxt doesn't complain about "*****" entries in Fortran output
 	              #(but why are they there?)  ### this should not happen, means your FAST input/FAST version are out of whack
 	out = myloadtxt(fname,skiprows=8+warmup)  # (8 is lines before data starts)
 	return hdr, out
@@ -68,7 +68,7 @@ class FST7Workflow (Component):
 	this class to enable OpenMDAO-style connectivity to FAST variables of interest."""
 
 	#def __init__(self, config, case):
-	def __init__(self, caseids, Tmax, dT, outputlist):
+	def __init__(self, caseids, Tmax, dT, rm_time, outputlist):
 		""" A FAST component that executes the workflow. Takes a single dictionary, config, as well as a case
 		name as the input. Executes FAST workflow in the associated case running directory.
 		"""
@@ -86,8 +86,12 @@ class FST7Workflow (Component):
 		# need to add Tmax, DT
 		self.Tmax = Tmax
 		self.Dt = dT
+		self.rm_time = rm_time
 
-		numval = (self.Tmax/self.Dt)+1
+		if rm_time == 0.0:
+			numval = (self.Tmax/self.Dt)+1
+		else:
+			numval = ((self.Tmax-self.rm_time)/self.Dt)+2
 
 		for i in range(0,len(outputlist)):
 
@@ -162,12 +166,12 @@ class FST7Workflow (Component):
 		if not os.path.isdir(self.writer.fst_directory):
 			os.makedirs(self.writer.fst_directory)
 
+
 		# Write new analysis files
 		self.writer.execute()
 
 		# Execute analysis
 		self.wrapper.execute()
-
 
 		# ===== Assign Outputs =====
 		# Build output file name
@@ -185,9 +189,11 @@ class FST7Workflow (Component):
 
 			unknowns[self.caseids][hdr[i]] = out[:,i]
 
-		# print('test for unknowns')
 		# print(unknowns[self.caseids])
 		# quit()
+		# print('finished FST7 Workflow')
+		# print(self.caseids)
+		# print(unknowns[self.caseids]['Spn4MLxb1'])
 
 class FST7AeroElasticSolver(Group):
 	"""
@@ -199,12 +205,10 @@ class FST7AeroElasticSolver(Group):
 	"""
 
 	#def __init__(self, configs, caseids):
-	def __init__(self, caseids, Tmax_turb, Tmax_nonturb, wndtypelist, dT, outputlist):
+	def __init__(self, caseids, T_turb, T_nonturb, rm_time, wndtypelist, dT, outputlist):
 		super(FST7AeroElasticSolver, self).__init__()
 
-		#self._check_config(configs, caseids) #could write function to check setup
-
-		pg = self.add('pg', ParallelGroup(),promotes=['*']) # add parallel group
+		pg = self.add('pg', ParallelGroup(), promotes=['*']) # add parallel group
 
 		#Loop over cases, add them to the parallel group
 		case_num = len(caseids)
@@ -212,13 +216,11 @@ class FST7AeroElasticSolver(Group):
 		for i in range(case_num):
 
 			if wndtypelist[i] == 'turb':
-				Tmax = Tmax_turb
+				Tmax = T_turb
 			else:
-				Tmax = Tmax_nonturb
+				Tmax = T_nonturb
 
-			pg.add(caseids[i], FST7Workflow(caseids[i],Tmax,dT, outputlist),promotes=['cfg_master',caseids[i]])
-
-
+			pg.add(caseids[i], FST7Workflow(caseids[i], Tmax, dT, rm_time, outputlist), promotes=['cfg_master', caseids[i]])
 
 if __name__=="__main__":
 	pass

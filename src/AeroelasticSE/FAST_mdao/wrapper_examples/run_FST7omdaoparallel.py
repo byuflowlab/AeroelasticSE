@@ -37,7 +37,7 @@ for i in range(4):
 
 	# These parameters the same for all cases
 	cfg['fst_masterfile'] = 'NRELOffshrBsline5MW_Onshore.fst'
-	cfg['fst_masterdir']= './NRELOffshrBsline5MW_Onshore_v7/'
+	cfg['fst_masterdir']= '/Users/bingersoll/Dropbox/GradPrograms/RotorSE_FAST/RotorSE/src/rotorse/FAST_Files/FAST_file_templates/'
 	cfg['fst_exe'] = '/Users/bingersoll/Dropbox/GradPrograms/FAST_glin64'
 	cfg['fst_file_type'] = 0
 	cfg['ad_file_type'] = 1 
