@@ -257,8 +257,12 @@ def do_rainflow(files, output_array, SNslope, dir_saved_plots, Tmax=600, dT = 0.
 
         # plot removed output data
         if check_rm_time:
+
+            # show rm_time
+            rm_time_show = 20.0
+
             time_chan = np.linspace(0,Tmax,len(chan[:,0]))
-            time_temp_chan = np.linspace(Tmax-rm_time,Tmax,len(temp_chan[:,0]))
+            time_temp_chan = np.linspace(Tmax-rm_time_show,Tmax,len(temp_chan[:,0]))
             import matplotlib.pyplot as plt
             plt.figure()
             plt.plot(time_chan,chan[:,5],label='original output')
